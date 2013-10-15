@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+  <!-- transactions, aop, and component-scans -->
+  <import resource="spring-config.xml" />
+
+  <bean id="sqlProps-standard" 
+	    class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    <property name="location" value="classpath:sql.properties"/>
+  </bean>
+  <bean id="sqlProps-memcache" 
+	    class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    <property name="location" value="classpath:sql.memcache.properties"/>
+  </bean>
+  
+  <!-- mybatis beans -->
+  <import resource="mybatis-beans-shared.xml" />
+  
+  <!-- Spring profiles -->
+  <import resource="profiles-config.xml" />
+  
+  <!-- Inject properties into application context upon initialization -->
+<!--   <bean id="refreshHandler"  -->
+<!--         class="gov.noaa.ncdc.crn.spring.ContextRefreshedEventHandler" /> -->
+</beans>

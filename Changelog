@@ -1,0 +1,284 @@
+CRNSHARED Changelog
+
+2.3.5 
+Removed unused StreamDao from ObservationService
+MyBatis statement name changes for clarity; using id and idArg where appropriate; deleted unused/old mapper statements
+modified StreamMapper.selectStreamElementList[ForDatalogger] to use association instead of additional select statement
+
+2.3.4 September 10, 2013
+Changing ElementValue.value to BigDecimal and requiring it in the constructor
+Modifying FileUtils.createDir to ensure success of creation is checked
+
+2.3.3 August 26, 2013
+changing query timeout to 115 (driven by web config changes)
+build improvements integrating checkstyle, pmd, and findbugs; fixed checkstyle violations
+
+2.3.2 August 21, 2013
+archive artifacts as snapshots on publish
+added ExceptionService.getUnresolvedExceptionFacts(int exceptionId) 
+added log4j-1.2.17 runtime dependency
+moved ojdbc-6 dependency to runtime
+extracting versioning to build.properties
+
+2.3.1 August 5, 2013
+bug fix ElementValue.publishedDecimalPlaces was returning -1 from stream_element table instead of default from element table
+updating unit tests to deal with stream_element db changes
+updating unit test because AK Barrow now commissioned but test expected it not to be
+fixing problematic inserting datetimes
+
+2.3.0 July 18, 2013
+upgrade Spring to 3.2.3, Guava to 14.0.1
+removing explicit dependencies on cglib, aopalliance, aspectj and some commons libraries in favor of implicit dependencies
+  from ivy
+reformatting whitespace
+renamed ant run-tests task to test and removed Cobertura support
+adding support for Range argument in CrnDomains.matches
+modifying ExceptionServiceTest to prevent clashing with new database constraint
+integrating ivy and deleting all previous dependencies
+ranaming ibatis.[memcache.]properties to sql.[memcache.]properties
+
+2.2.0 July 8, 2013
+moving StationMetadataDao.getStationRainGaugeDepth to StationService
+removing support for updating a station's metadata (Dao,Impl,Mapper); this should now only be done by the database
+removing deprecated ElementDao methods and related LastModsQueryBuilder and Service; class no longer ApplicationContextAware
+changing NetworkDao.getNetwork argument from Integer to int
+finalizing arguments to DaoImpl methods where unexpected to change
+new StationAware, DatetimeAware, ElementAware interfaces allow for generic filtering
+adding generic filters and matching on stationId, datetimeId, elementId (CrnDomains)
+integrating new STATION_ID Function into StationComparator
+new ExceptionService.getUnresolvedExceptions method
+replacing javadoc folder with jar
+returning accidentally deleted method, Stream.getMeasuresSoil1M (not deprecated)
+remove reference to resolutions table in ExceptionService.getException[FromTicket];
+  fixes bug where multiple resolutions results in multiple exceptions returned
+removing unused immature jaxb support in favor of json
+
+2.1.2 June 19, 2013
+added TimeUtils.convertLST(From|To)UTC and modified TimeUtils.convert(From|To)UTC
+  documentation to correctly indicate that daylight saving time is considered
+new ObservationService.addCalculatedValuesToObs(Collection) removes 
+  dependency on Observation; ObservationService.addCalculatedValuesToObs(Map) no
+  longer uses Observation key
+PorService.updatePor updates the beginning of POR when start date precedes existing
+new PorServiceTest; removing PorDaoTest (falls under service test class)
+new ElementValues Predicates for filtering ElementValues based on stationId, datetimeId, elementId
+deprecating FileUtils.deleteDirectoryContents
+removing deprecated ComparatorUtils
+improved code coverage, particularly new service object tests; removing redundant tests
+
+2.1.1 May 16, 2013
+generating resolution ids from sequence
+bug fix: setting pseudo rcrn in Station constructor
+increasing immutability in some domain objects
+exception_resolution last_modified set by trigger in database now; removing from mybatis insert
+
+2.1.0 May 10, 2013
+provides support for ExceptionResolutions
+adding Guava functions and predicates for filtering Exceptions
+adding mock data sql inserts to StationDao, StationService, QcDao tests for mock data; adding rollbacks
+updated unittest database to crndb-3.4.0; a few unit test alterations needed
+integrating new element table columns into Element domain object
+removed ibatis support; deleted extraneous configurations including Contexts.ISIS 
+update mybatis to 3.2.2 and mybatis-spring to 1.2.0
+deprecated undocumented ConversionUtils.dtrunc()
+removing deprecated methods: FileUtils.getXChecksum methods (now private), all
+  domain object setters, CrnException set/get resolutions)
+
+2.0.6 April 11, 2013
+adding calculated status, default decimal places, units, duration, and end minutes
+  to Element domain object (not in db yet)
+modify BV_UFL query in StreamMapper.xml to resolve conflict
+removing now obsolete GoesIdTypeHandler
+refining MathUtils methods by prefiltering nulls; adding Preconditions
+new SUM, AVERAGE_10TH, AVERAGE_100TH Functions in MathUtils
+refactoring to use Preconditions in ObservationService
+added inserts for when QcDaoTest test data gets refreshed in database
+ 
+2.0.5 March 11, 2013
+Station.goesId now the full "CD"-prefixed version; adding query support to make
+  transition easier
+new static Predicates and station filtering
+fixed bug which incorrectly presents test stations in StationService.getClosedStations()
+adding isClosed() method and pseudoRcrn field to Station
+
+2.0.4 February 26, 2013
+bumped down cache for POR from 200 minutes (accidental) to 5 minutes
+throttling inserts, updates, deletes
+
+2.0.3 February 15, 2013
+- fixed bug where caching was disabled in QcMapper
+- new static method ApplicationContextProvider.createApplicationContext
+
+2.0.2 February 8, 2013
+- removing deprecated MathUtilsOldRounding class
+- fixed bug where flag gets inserted for a new ob when it's zero
+- fixed bug where flags for all elements were deleted when calling ObservationService.deleteCalculatedValues 
+
+2.0.1 January 14, 2013
+- new ElementService, LastModsService and SystemMaintenanceService objects
+- added some ElementValue retrieval methods to ObservationService
+- new method for inserting multiple years' worth of datetimeIds
+- adding mybatis impls for ConnectionDao, DatetimeDao, QcDao; refactored ExceptionDao
+  for architectural consistency
+- deprecated ElementDao.getLastModsForX[xxx] methods in favor or LastModsQueryBuilder
+- moved & renamed Dao tests to reflect the fact that they test interfaces
+- removing deprecated Datetime methods
+- fixed bug where batched statements reach max cursor limit 
+- fixed bug where stationDao.getStation(int) does not return a station with no POR
+- new unit tests on ConnectionMapper, DatetimeMapper, ExceptionMapper
+- beginning to remove support for ibatis impls
+- updated jdbc.properties command-line generation
+- removed unit test dependency on prod database (not running a couple unit tests
+  which depend on production configuration)
+
+2.0.0 December 20, 2012
+- requires Java 7 to compile and execute
+- spring 3.1, junit 4.11, commons-dbcp-1.4, commons-pool 1.6, cglib 2.2.3 updates
+- new StreamDao, ObservationDao, ElementDao, PorDao mybatis implementations
+- ApplicationContextProvider retrieves most common contexts
+- removed SqlMapClient dependency from ObservationService
+- bug fix: ExceptionService/Dao.getExceptionsFromTicket(ExceptionTicketSystem, String) 
+  returns Collection<CrnException>
+- adding new StationComparator.SORT.TEST, which sorts test stations to the end
+-- TODO test below statement
+- KNOWN ISSUE: gov.noaa.ncdc.crn.dao.mybatis.ObservationDaoImpl.deleteCalculatedValues
+  returns nonsensical value when in BATCH mode (no work around)
+- StationDao.updateStationMetadata returns void instead of nonsensical int
+- Flags serializable, Element.toString modification, Station.opStatus is now boolean
+  Station.operational; affects Station.toString
+- toString, compareTo, hashCode, equals in new domain objects
+- removing experimental ObservationWithData2
+- removing deprecated FileUtils methods; deprecating checksum methods in favor of a
+  single method which supports different checksums
+
+1.4.1 November 7, 2012
+- changing ant Java compilation to 1.6 & other build script mods
+- exception list domain and dao support
+- adding dependency on mybatis-3.2.0
+- upgrading Guava to 13.0.1
+- adding ElementDao.updateFlags capability
+- rewriting checksum algorithms in FileUtils and deprecating a bunch of unused
+  methods
+- using Guava in SyncFromIsis to avoid file open/closes
+- adding JAXB support to ElementValue
+- new ObservationService & ElementDaoImpl unit tests to test adding calculated
+  elements to existing observation
+  
+1.4.0 August 29, 2012
+- removes jdbc config from shared application context (use jdbc context instead)
+  and refactors other app-contexts for consistency
+- implements new rounding method - assymetric round half up (always toward 
+  positive infinity)
+- removed rounding mode from QcDeltaParam and QcRangeParam because rounding now
+  changes based on sign of item to be rounded, and these classes should not be
+  influencing how rounding is done (calling program should do that)
+- new MathUtilsOldRounding solely for cases where we want to compare the old
+  rounding to the new; deprecating but making available until Feb 1 2013
+  
+1.3.15 July 23, 2012
+- removing deprecated Stream.get5MinWind() and Stream.set5MinWind()
+- adding classpath prefix to ibatis.properties in application context xmls
+- adding new stream properties
+- changing some IR property names to reflect new semantics
+
+1.3.14 July 11, 2012
+- modifying MathUtils methods to throw a NullPointerException when an empty
+  Collection is passed as an argument
+- modifying StationService.getStationByGoesId to retrieve stations which have
+  not yet transmitted data
+- support to delete a range of data for a station
+- StationService: allow retrieval from a Collection instead of List of
+  stationIds, support to include stations which have not transmitted data,
+  refactored some methods to reduce duplication and utilize Guava
+  
+1.3.13 June 18, 2012
+- directly referencing schema name in StationMetadata.rainGaugeDepths
+- new data importer class to facilitate bringing over datetimes and stations
+  from source databases
+- new batch updateExportedToIsd method, plus changed method signature on single
+  update method
+- rewriting ElementDaoImpl.insertElementValues as batch insert (affects
+  ObservationService.addCalculatedVlauesToObs)
+- removing jdbc.properties from application-context-shared.xml
+- altering StreamElement to be composite object
+- fixing some unit tests which break when period of record table is updated
+
+1.3.12 May 23, 2012
+- adding JAXB support to Station object
+- executing batch inserts more frequently to prevent Oracle max open_cursors bug 
+  
+1.3.11 May 2, 2012
+- adding support for retrieving rain gauge depth for a station at a datetime
+- removing aop transactionality tests because doing everything in a single
+  database call now, so can't intercept
+- changing return methods in service & daos from int to void where implementing
+  as batch statement to avoid confusion even though this is jdbc implementation-
+  specific
+- adding support for transactional inserts in observationdao
+- added support for retrieving Stations by goesId even when there are goesIds
+  used for more than one station
+- added closed date to Station
+- added ability to sort stations based on POR and closed date
+- fixing bug but deprecating TimeUtils.prettyCalendarDate methods;
+  they were converting to local time instead of showing utc; not used anywhere
+- adding TimeUtils.createCalendar(Date) method and new unit tests
+- removing deprecated TimeUtils methods: createUTCCalendar(Datetime), getDatestring(Date),
+  getYYYYMMDDHH24MI(Calendar), createUTCCalendar(int,int,int,int,int), UTCnow()
+
+1.3.10 April 17, 2012
+- modifying unit tests which depend on updateLastModified
+- new ObservationService.deleteCalculatedValues()
+- ObservationServiceTest cleanup inserted calculated values on setup
+- removing ObservationDao.updateLastModified in favor of using database triggers
+  to keep mod dates consistent
+- integrating guava into element dao for better cache access
+- adding por access to station service
+
+1.3.9 March 7, 2012
+- factoring out ibatis.properties in configs for future ease of configuration
+- modifying MEMCACHE distribution to wait 10 minutes before queries timeout
+- new TimeUtils.diffHours(String,String)
+- ObservationWithData now serializable
+- ObservationDao.getObservations(int startDatetimeId, int endDatetimeId, 
+    Collection<Integer> stationIds)
+
+1.3.8 February 11, 2012 r32415
+- providing Dao and Service layer support for adding calculated values to an 
+  Observation and updating its last modified time and/or time exported to ISD
+- providing datetimeId and stationId getters in ObservationWithData and updating
+  its toString to reintroduce info on the Observation
+- narrowing QC delta and range param results to include only elements available 
+  in requested stream
+- generalizing Dao methods to accept Collection arguments instead of Lists
+- refactoring DelimitedIntegerTypeHandler callback to use Guava transform
+- removing references to deprecated database table
+
+1.3.7 January 10, 2012 r31719
+- Bug Fix: Added new 5-minute 1.5m wind variables to Stream.xml query; provided
+  supporting unit tests
+- Added Changelog
+  
+1.3.6 December 20, 2011 r31330
+- Bug Fix: refactored ConversionUtils methods where division by BigDecimal.ZERO
+    threw exception due to empty set averaging, etc.
+- Added Dependency: guava-10.0.01.jar
+- Added support for new 5-minute wind, soil, IR, and solar radiation variables
+  see Stream.*5min* and Stream.measuresCalibratedIr
+  deprecated Stream.measures5MinWind in favor of measures5MinWindAt1*
+- Refactored several classes to incorporate guava convenience methods
+  equals(), hashCode(), toString(), input validation
+  ElementDaoImpl, gov.noaa.ncdc.crn.domain.*
+- Added PropertyUtils class for bringing in properties to the runtime environment
+  currently limited to a single property file 
+- Refactored ElementDaoImpl to use guava for validation
+- Updating ConnectionUnavailableException to allow no message construction 
+- deprecated ComparatorUtils in favor of guava ComparisonChain; refactored it
+    for consistency
+- removed deprecated MathUtils methods; use ConversionUtils instead
+
+1.3.5 December 5, 2011 r31061
+- new MathUtils.sum(Collection<BigDecimal>)
+- added Stream.hasSecondaryTransmitter property (affects Stream.xml)
+- removed deprecated Station.coopno (affects StationMetadata.xml)
+- refactored crn.domain classes to suppress serialization warnings and use 
+    default serial id

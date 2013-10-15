@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  
+  <!--  Either this file must be on the classpath or all properties in the filter must be passed with the java -D switch -->
+  <available file="${resources-test.dir}/jdbc.properties" property="jdbc.present"/>
+  
+  <!-- Filter tokens, defined at the command line -->
+  <filterset id="jdbc-filters" begintoken="%%" endtoken="%%">
+    <filter token="jdbc.driverClassName" value="${jdbc.driverClassName}" />
+    <filter token="jdbc.validationQuery" value="${jdbc.validationQuery}" />
+    <filter token="prod.jdbc.url" value="${prod.jdbc.url}" />
+    <filter token="test.jdbc.url" value="${test.jdbc.url}" />
+    <filter token="dev.jdbc.url" value="${dev.jdbc.url}" />
+    <filter token="unit.jdbc.username" value="${unit.jdbc.username}" />
+    <filter token="unit.jdbc.password" value="${unit.jdbc.password}" />
+    <filter token="prod.jdbc.username" value="${prod.jdbc.username}" />
+    <filter token="prod.jdbc.password" value="${prod.jdbc.password}" />
+    <filter token="prod-ro.jdbc.username" value="${prod-ro.jdbc.username}" />
+    <filter token="prod-ro.jdbc.password" value="${prod-ro.jdbc.password}" />
+    <filter token="test-ro.jdbc.username" value="${test-ro.jdbc.username}" />
+    <filter token="test-ro.jdbc.password" value="${test-ro.jdbc.password}" />
+    <filter token="test-rw.jdbc.username" value="${test-rw.jdbc.username}" />
+    <filter token="test-rw.jdbc.password" value="${test-rw.jdbc.password}" />
+    <filter token="dev-ro.jdbc.username" value="${dev-ro.jdbc.username}" />
+    <filter token="dev-ro.jdbc.password" value="${dev-ro.jdbc.password}" />
+    <filter token="dev-rw.jdbc.username" value="${dev-rw.jdbc.username}" />
+    <filter token="dev-rw.jdbc.password" value="${dev-rw.jdbc.password}" />
+    <filter token="custom.jdbc.url" value="${custom.jdbc.url}" />
+    <filter token="custom.jdbc.username" value="${custom.jdbc.username}" />
+    <filter token="custom.jdbc.password" value="${custom.jdbc.password}" />
+    <filter token="custom.jdbc.driverClassName" value="${custom.jdbc.driverClassName}" />
+    <filter token="custom.jdbc.validationQuery" value="${custom.jdbc.validationQuery}" />
+    <filter token="cache.strategy" value="${cache.strategy}" />
+  </filterset>
+  
+  <target name="compile-crn" depends="create-jdbc" description="Compile CRN Files" />
+  
+  <target name="create-test-jdbc" unless="jdbc.present"
+          description="Create a jdbc.properties file from environment if one not present">
+    <echo message="Creating jdbc.properties file from java switch."/>
+    <copy file="${resources-test.dir}/jdbc.properties.external" tofile="${resources-test.dir}/jdbc.properties">
+      <filterset refid="jdbc-filters"/>
+    </copy>
+  </target>

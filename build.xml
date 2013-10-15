@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+
+  Based on NCDC Standard Ant Build Script for Java Web Applications.
+  
+  This defines standard targets as follows:
+  
+  Main targets:
+
+  all              Clean, build, analyze, document and package for distribution
+  analyze          Analyze project to produce various metrics
+  clean            Delete build, dist and reports directories
+  compile          Compile Java sources
+  compile-tests    Compiles JUnit tests
+  dist             Create binary distribution (.jar) in ${dist.dir} directory
+  findbugs         Performs byte code analysis using FindBugs, if enabled
+  help             Provides instructions on using build
+  javadoc          Create Javadoc API documentation
+  pmd              Performs static code analysis using PMD, if enabled
+  prepare          Prepares workspace for build
+  test             Runs JUnit tests
+  Default target: compile
+
+  Modifications are allowed as long as the standard tasks are preserved.
+  Developers should set the project name and application properties fields
+  below.
+
+  Other properties may be defined/modified in build.properties as the project 
+  requires.
+
+  -->
+
+<!-- Project definition, name should match your project -->
+<project name="crnshared - Climate Reference Network Shared Code Base" default="compile" basedir="." 
+	xmlns:ivy="antlib:org.apache.ivy.ant" 
+	xmlns:jacoco="antlib:org.jacoco.ant" 
+	xmlns:cs="antlib:com.puppycrawl.tools.checkstyle">
+	<!-- 
+	 NOTE:  The properties configuration below represent default values. 
+	        Avoid adding or edit these in build.xml.  Instead, override
+	        in build.properties.  Properties defined in build.properties
+	        take precedence over build.xml.
+    -->
+
+	<!--
+    ==================== BASIC PROPERTIES/CONFIG ====================
+   -->
+
+	<!-- Load properties from build-dev.properties -->
+	<property file="build-dev.properties" />
+
+	<!-- Load properties from build.properties -->
+	<property file="build.properties" />
+
+	<!-- Load environment variables -->
+	<property environment="env" />
+
+	<!-- Application Properties -->
+	<property name="app.name" value="crnshared" />
+	<property name="author.name" value="Andrea Fey" />
+	<property name="app.version" value="1.0" />
+
+	<!-- Ant verbosity -->
+	<property name="ant.verbose" value="true" />
+
+	<!-- 
+    ==================== PROJECT PROPERTIES ====================
+    -->
+	<!-- Project source directories -->
+	<property name="java.dir" location="src/java/main" />
+	<property name="resources.dir" location="src/resources/main" />
+
+	<!-- Base directory for all build files -->
+	<property name="build.dir" location="build" />
+
+	<!-- Project build directory -->
+	<property name="classes.dir" location="${build.dir}/classes" />
+
+	<!-- Project external dependencies directory -->
+	<property name="lib.dir" location="lib" />
+
+	<!-- Project directory for all distribution files (wars, jars, etc...) -->
+	<property name="dist.dir" location="dist" />
+
+	<!-- Base directory for all documentation files -->
+	<property name="docs.dir" value="docs" />
+
+	<!-- Project API documentation directory (javadoc) -->
+	<property name="javadoc.dir" location="${docs.dir}/javadoc" />
+
+	<!-- Base directory for all reports (junit, jacoco, pmd, etc.) -->
+	<property name="reports.dir" location="reports" />
+	<property name="reports-junit.dir" location="${reports.dir}/junit" />
+	<property name="reports-jacoco.dir" location="${reports.dir}/jacoco" />
+	<property name="reports-ivy.dir" value="${reports.dir}/ivy" />
+
+	<!-- 
+	==================== JUNIT PROPERTIES ====================
+	 -->
+
+	<!-- JUnit installation directory -->
+	<property name="junit.home" value="${env.JUNIT_HOME}" />
+
+	<!-- Project unit test source directory -->
+	<property name="java-test.dir" location="src/java/test" />
+	<property name="resources-test.dir" location="src/resources/test" />
+
+	<!-- Project unit test configuration files directory -->
+	<property name="test-config.dir" location="test-contexts" />
+
+	<!-- Project unit test build directory -->
+	<property name="classes-test.dir" location="${build.dir}/test-classes" />
+
+	<!-- Unit test report format -->
+	<property name="reports-test.format" value="xml" />
+
+	<!--
+	==================== IVY PROPERTIES ====================
+	-->
+
+	<property name="ivy.version" value="2.3.0" />
+	<property name="ivy.jar" value="${lib.dir}/ivy.jar" />
+	<property name="repo.base" value="http://crntools.cms-b.ncdc.noaa.gov" />
+	<property name="repo.url" value="${repo.base}/artifactory" />
+
+	<!-- 
+	==================== PMD PROPERTIES ====================== 
+	-->
+
+	<!-- PMD report format -->
+	<property name="reports-pmd.format" value="xml" />
+	<!-- PMD report directory -->
+	<property name="reports-pmd.dir" location="${reports.dir}/pmd" />
+	<!-- PMD report filename -->
+	<property name="reports-pmd.filename" value="pmd.xml" />
+
+	<!--
+	==================== FINDBUGS PROPERTIES ====================
+	-->
+
+	<!-- FindBugs report directory -->
+	<property name="reports-findbugs.dir" location="${reports.dir}/findbugs" />
+	<!-- FindBugs report format -->
+	<property name="reports-findbugs.format" value="xml" />
+	<!-- FindBugs report filename -->
+	<property name="reports-findbugs.filename" value="findbugs.xml" />
+
+	<!--
+	==================== CHECKSTYLE PROPERTIES ====================
+	-->
+
+	<!-- Checkstyle report directory -->
+	<property name="reports-checkstyle.dir" location="${reports.dir}/checkstyle" />
+	<!-- Checkstyle report format -->
+	<property name="reports-checkstyle.format" value="xml" />
+	<!-- Checkstyle report filename -->
+	<property name="reports-checkstyle.filename" value="checkstyle.xml" />
+
+	<!--
+	==================== JAVA COMPILER PROPERTIES ====================== 
+	-->
+
+	<!-- Debug mode -->
+	<property name="compile.debug" value="false" />
+	<property name="compile.debuglevel" value="lines,source" />
+
+	<!-- Deprecation mode -->
+	<property name="compile.deprecation" value="false" />
+
+	<!-- Optimization mode -->
+	<property name="compile.optimize" value="false" />
+
+	<!-- Verbosity mode -->
+	<property name="compile.verbose" value="false" />
+
+	<!-- Default Java version -->
+	<property name="compile.version" value="${ant.java.version}" />
+
+	<!-- Compile all test classes by default, but override for individual testing -->
+	<property name="compile.test-classes" value="**/*.java" />
+
+	<!-- 
+	==================== TARGETS ====================
+	-->
+
+	<!-- 
+		all:  
+		cleans, builds, analyzes and creates distribution
+	-->
+	<target name="all" depends="clean,analyze,javadoc,dist" description="Clean, build, analyze, document and package for distribution" />
+
+	<!-- 
+		clean:
+		Cleans up workspace by deleting build, dist and reports directories
+	 -->
+	<target name="clean" description="Delete build, dist and reports directories">
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+		<delete dir="${reports.dir}" />
+		<delete dir="${docs.dir}" />
+	</target>
+
+	<!-- 
+		prepare:
+		Prepares the workspace for build
+	-->
+	<target name="prepare" description="Prepares workspace for build">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${reports.dir}" />
+		<mkdir dir="${docs.dir}" />
+        <mkdir dir="${lib.dir}" />
+	</target>
+
+	<!-- 
+		compile:
+		Turns Java source code into byte code
+	 -->
+	<target name="compile" depends="prepare,retrieve-dependencies" description="Compile Java sources">
+		<echo message="Using Java version ${compile.version}" />
+		<!-- Create the build output directory -->
+		<mkdir dir="${classes.dir}" />
+
+		<!-- Turn Java src code into byte code -->
+		<javac includeantruntime="false" srcdir="${java.dir}" destdir="${classes.dir}" target="${compile.version}" source="${compile.version}" bootclasspath="${compile.bootclasspath}" debug="${compile.debug}" debuglevel="${compile.debuglevel}" deprecation="${compile.deprecation}" optimize="${compile.optimize}" verbose="${compile.verbose}">
+			<classpath refid="compile.path" />
+		</javac>
+
+		<!-- Copy associated config files -->
+		<copy todir="${classes.dir}">
+			<fileset dir="${resources.dir}" includes="**/*.properties,**/*.xml" />
+		</copy>
+
+	</target>
+
+	<!-- 
+		dist:
+		Creates a distribution directory and JAR file for the application
+	-->
+	<target name="dist" depends="clean,version,test,javadoc" description="Create binary distribution with sources and javadoc in ${dist.dir} directory">
+		<!-- Create a library JAR file -->
+		<jar jarfile="${dist.dir}/${app.name}-${ivy.new.revision}.jar" basedir="${classes.dir}" index="true">
+			<manifest>
+				<attribute name="Manifest-Version" value="${ivy.new.revision}" />
+				<attribute name="Compile-Date" value="${TODAY}" />
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Created-By" value="${author.name}" />
+			</manifest>
+		</jar>
+
+		<!-- Create a sources JAR file -->
+		<jar jarfile="${dist.dir}/${app.name}-sources-${ivy.new.revision}.jar" basedir="${java.dir}" includes="**/*.java" />
+
+		<!-- Create a javadoc JAR file -->
+		<jar jarfile="${dist.dir}/${app.name}-javadoc-${ivy.new.revision}.jar" basedir="${javadoc.dir}" includes="**/*" />
+
+		<ivy:deliver deliverpattern="${dist.dir}/[artifact].[ext]" pubrevision="${ivy.new.revision}" />
+	</target>
+
+	<!-- TODO consider how want to handle versioning between tags and version.properties and ivy property, etc.
+	     removed classpath.base, so will need to use something else (compile.path?) -->
+	<!--
+	  <target name="create-version" depends="compile" 
+	          description="Create a version.properties file from a java class">
+	     <java classname="gov.noaa.ncdc.crn.util.Version" classpath="${classes.dir}" 
+	            classpathref="classpath.base" failonerror="true" />
+	     <property file="version.properties" />
+	     <condition property="version" value="${app.version.svn}"><isset property="app.version.svn"/></condition>
+	     <property name="version" value="${app.version}" />
+	  </target>
+	-->
+
+	<!--
+	  There are three different versioning strategies taking place.  The first is the subversion #, the second is the
+	  Jenkins build #, and the third is the Ivy build #.  Subversion and Jenkins
+	  versions can be included in the manifest of the Jar file being built.  The ivy version
+	  can be used to version the distribution.
+	-->
+	<target name="version" depends="compile" description="Acquires environment information for identifying the current build.">
+		<!-- Try to get a build number, which would be set automatically, from Jenkins. -->
+		<condition property="build.number" value="${env.BUILD_NUMBER}" else="DEV">
+			<isset property="env.BUILD_NUMBER" />
+		</condition>
+		<condition property="build.svn.revision" value="${env.SVN_REVISION}" else="TRUNK">
+			<isset property="env.SVN_REVISION" />
+		</condition>
+		<tstamp>
+			<format property="build.date" pattern="yyyy-MM-dd hh:mm aa" unit="hour" />
+		</tstamp>
+
+		<ivy:buildnumber resolver="crn-snapshots" organisation="${ivy.organisation}" module="${ivy.module}" revision="${ivy.revision}" />
+		<echo message="[svn] ${build.svn.revision}" />
+		<echo message="[build] ${build.number}" />
+		<echo message="[version] ${ivy.revision}" />
+	</target>
+
+	<!-- 
+      compile-tests:
+      Compiles unit test source code into byte code
+     -->
+	<target name="compile-tests" depends="compile,create-test-jdbc" description="Compiles JUnit tests">
+		<mkdir dir="${classes-test.dir}" />
+
+		<javac srcdir="${java-test.dir}" destdir="${classes-test.dir}" target="${compile.version}" source="${compile.version}" debug="${compile.debug}" debuglevel="${compile.debuglevel}" deprecation="${compile.deprecation}" optimize="${compile.optimize}" verbose="${compile.verbose}" includeantruntime="false">
+			<classpath refid="test.path" />
+			<classpath>
+				<pathelement location="${classes.dir}" />
+			</classpath>
+			<!-- Usually **/*Test.class, but can be overridden in 
+         	     build.properties to select certain classes only -->
+			<include name="${compile.test-classes}" />
+		</javac>
+
+		<!-- Copy associated config files -->
+		<copy todir="${classes-test.dir}">
+			<fileset dir="${resources-test.dir}" includes="**/*.properties,**/*.xml,**/*.sql" />
+		</copy>
+
+	</target>
+
+	<target name="javadoc" depends="compile" description="Generate Javadoc API documentation">
+
+		<mkdir dir="${javadoc.dir}" />
+
+		<javadoc sourcepath="${java.dir}" destdir="${javadoc.dir}" packagenames="*" useexternalfile="true" verbose="${compile.verbose}">
+			<classpath refid="runtime.path" />
+		</javadoc>
+
+	</target>
+
+	<target name="test" depends="compile-tests" description="Runs JUnit tests with code-coverage analysis">
+		<echo message="Running JUnit tests" />
+
+		<mkdir dir="${reports-junit.dir}" />
+		<mkdir dir="${reports-jacoco.dir}" />
+
+		<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml" classpathref="test.path" />
+
+		<jacoco:coverage destfile="${classes-test.dir}/jacoco.exec">
+
+			<junit fork="true" forkmode="once" haltonfailure="yes">
+				<classpath refid="test.path" />
+				<classpath>
+					<pathelement location="${classes.dir}" />
+				</classpath>
+				<classpath>
+					<pathelement location="${classes-test.dir}" />
+				</classpath>
+				<formatter type="xml" />
+				<batchtest todir="${reports-junit.dir}">
+					<fileset dir="${classes-test.dir}">
+						<include name="**/*Test*" />
+						<exclude name="**/*$*.class" />
+					</fileset>
+				</batchtest>
+			</junit>
+		</jacoco:coverage>
+
+		<jacoco:report>
+			<executiondata>
+				<file file="${classes-test.dir}/jacoco.exec" />
+			</executiondata>
+			<structure name="crnshared">
+				<classfiles>
+					<fileset dir="${classes.dir}" />
+				</classfiles>
+				<sourcefiles encoding="UTF-8">
+					<fileset dir="${java.dir}" />
+				</sourcefiles>
+			</structure>
+			<html destdir="${reports-jacoco.dir}" />
+		</jacoco:report>
+	</target>
+
+	<!--  Either jdbc.properties must be on the classpath or all required properties in the 
+	      filterset jdbc-filters must be passed with the java -D switch -->
+	<available file="${resources-test.dir}/jdbc.properties" property="jdbc.present" />
+
+	<!-- Filter tokens, defined at the command line -->
+	<filterset id="jdbc-filters" begintoken="%%" endtoken="%%">
+		<filter token="jdbc.driverClassName" value="${jdbc.driverClassName}" />
+		<filter token="jdbc.validationQuery" value="${jdbc.validationQuery}" />
+		<filter token="prod.jdbc.url" value="${prod.jdbc.url}" />
+		<filter token="test.jdbc.url" value="${test.jdbc.url}" />
+		<filter token="dev.jdbc.url" value="${dev.jdbc.url}" />
+		<filter token="unit.jdbc.username" value="${unit.jdbc.username}" />
+		<filter token="unit.jdbc.password" value="${unit.jdbc.password}" />
+		<filter token="prod.jdbc.username" value="${prod.jdbc.username}" />
+		<filter token="prod.jdbc.password" value="${prod.jdbc.password}" />
+		<filter token="prod-ro.jdbc.username" value="${prod-ro.jdbc.username}" />
+		<filter token="prod-ro.jdbc.password" value="${prod-ro.jdbc.password}" />
+		<filter token="test-ro.jdbc.username" value="${test-ro.jdbc.username}" />
+		<filter token="test-ro.jdbc.password" value="${test-ro.jdbc.password}" />
+		<filter token="test-rw.jdbc.username" value="${test-rw.jdbc.username}" />
+		<filter token="test-rw.jdbc.password" value="${test-rw.jdbc.password}" />
+		<filter token="dev-ro.jdbc.username" value="${dev-ro.jdbc.username}" />
+		<filter token="dev-ro.jdbc.password" value="${dev-ro.jdbc.password}" />
+		<filter token="dev-rw.jdbc.username" value="${dev-rw.jdbc.username}" />
+		<filter token="dev-rw.jdbc.password" value="${dev-rw.jdbc.password}" />
+		<filter token="custom.jdbc.url" value="${custom.jdbc.url}" />
+		<filter token="custom.jdbc.username" value="${custom.jdbc.username}" />
+		<filter token="custom.jdbc.password" value="${custom.jdbc.password}" />
+		<filter token="custom.jdbc.driverClassName" value="${custom.jdbc.driverClassName}" />
+		<filter token="custom.jdbc.validationQuery" value="${custom.jdbc.validationQuery}" />
+		<filter token="cache.strategy" value="${cache.strategy}" />
+	</filterset>
+
+	<target name="create-test-jdbc" unless="jdbc.present" description="Create a jdbc.properties file from environment if one not present">
+		<echo message="Creating jdbc.properties file from java switch." />
+		<copy file="${resources-test.dir}/jdbc.properties.external" tofile="${resources-test.dir}/jdbc.properties">
+			<filterset refid="jdbc-filters" />
+		</copy>
+	</target>
+
+	<!--
+	==================== IVY TARGETS ====================
+	-->
+
+	<target name="check-ivy" description="Checks whether or not the ivy jar file needs to be downloaded.">
+		<available file="${ivy.jar}" property="skip.download" />
+	</target>
+
+	<target name="download-ivy" depends="check-ivy" unless="skip.download" description="Download ivy.jar">
+		<mkdir dir="${lib.dir}" />
+		<echo message="installing ivy..." />
+		<get src="http://crntools.cms-b.ncdc.noaa.gov/artifactory/remote-repos/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" dest="${ivy.jar}" usetimestamp="true" />
+	</target>
+
+	<target name="install-ivy" depends="download-ivy" description="Add Ivy task definitions to Ant">
+		<taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpath="${ivy.jar}" />
+	</target>
+
+	<target name="clean-ivy" description="Delete ${ivy.jar}">
+		<echo message="Deleting ${ivy.jar}" />
+		<delete file="${ivy.jar}" />
+	</target>
+
+	<target name="retrieve-dependencies" depends="install-ivy" description="Cache project dependencies and create classpaths">
+		<ivy:resolve />
+		<ivy:report todir="${reports.dir}/ivy" graph="false" />
+		<ivy:cachepath pathid="compile.path" conf="compile" />
+		<ivy:cachepath pathid="runtime.path" conf="runtime" />
+		<ivy:cachepath pathid="test.path" conf="test" />
+	</target>
+
+    <!-- Publish release artifacts to release repository. Used on an existing build that is already published to 
+         snapshots repository (and note that the snapshots repository is what determines the build number. -->
+    <target name="publish-release" depends="install-ivy"
+    	description="Publish all artifacts of existing build to the release repository">
+        <ivy:resolve file="${dist.dir}/ivy.xml" />
+        <ivy:publish srcivypattern="${dist.dir}/[artifact].[ext]" resolver="crn-releases" overwrite="false" 
+            publishivy="true" forcedeliver="true" status="release"
+            artifactspattern="${dist.dir}/[artifact](-[classifier])-[revision].[ext]" />
+    </target>
+
+	<!-- Publish integration artifacts to snapshot repository. Used on an existing build, but not creating dependency 
+	     to avoid running that target twice -->
+	<target name="publish-snapshot" depends="install-ivy" 
+		description="Publish all artifacts of existing build to the snapshot repository">
+		<ivy:resolve file="${dist.dir}/ivy.xml" />
+		<ivy:publish srcivypattern="${dist.dir}/[artifact].[ext]" resolver="crn-snapshots" overwrite="false" 
+			publishivy="true" forcedeliver="true" status="integration"
+			artifactspattern="${dist.dir}/[artifact](-[classifier])-[revision].[ext]" />
+	</target>
+
+	<target name="help" description="Describes how to use this build script">
+		<echo message="Provide a jdbc.properties file in ${resources-test.dir} or use the java -D switch to set all needed properties." />
+		<echo message="See ${resources-test.dir}/jdbc.properties.external for complete properties list." />
+	</target>
+
+	<!--
+	==================== ANALYSIS TARGETS ====================
+	-->
+	<target name="analyze" depends="test,findbugs,pmd,checkstyle" description="Analyze the code quality of this project" />
+
+	<!--
+		pmd:
+		Performs static code analysis using PMD, generates report of rules
+        violations
+	-->
+	<target name="pmd" depends="prepare,retrieve-dependencies" description="Performs static code analysis using PMD, if enabled">
+		<echo message="Performing source code analysis with PMD" />
+		<!-- Load PMD tasks -->
+		<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="test.path" />
+		<!-- Create the PMD reports directory -->
+		<mkdir dir="${reports-pmd.dir}" />
+
+		<!-- Perform static code analysis using included rulesets -->
+		<pmd failonerror="true" failOnRuleViolation="false" shortFilenames="true">
+			<ruleset>basic</ruleset>
+			<ruleset>braces</ruleset>
+			<ruleset>clone</ruleset>
+			<ruleset>codesize</ruleset>
+			<ruleset>coupling</ruleset>
+			<ruleset>design</ruleset>
+			<ruleset>finalizers</ruleset>
+			<ruleset>imports</ruleset>
+			<ruleset>logging-jakarta-commons</ruleset>
+			<ruleset>logging-java</ruleset>
+			<ruleset>naming</ruleset>
+			<ruleset>optimizations</ruleset>
+			<ruleset>strictexception</ruleset>
+			<ruleset>strings</ruleset>
+			<ruleset>typeresolution</ruleset>
+			<ruleset>unusedcode</ruleset>
+			<formatter type="${reports-pmd.format}" toFile="${reports-pmd.dir}/${reports-pmd.filename}" />
+			<fileset dir="${java.dir}">
+				<include name="**/*.java" />
+			</fileset>
+		</pmd>
+
+	</target>
+
+	<!--
+       checkstyle:
+       Performs format analysis on source code
+    -->
+	<target name="checkstyle" depends="retrieve-dependencies" description="Analyze source code for format violations">
+		<taskdef resource="checkstyletask.properties" classpathref="test.path" />
+		<!-- Create the Checkstyle reports directory -->
+		<mkdir dir="${reports-checkstyle.dir}" />
+		<checkstyle config="${resources-test.dir}/crn_checkstyle.xml" failOnViolation="false">
+			<fileset dir="${java.dir}" includes="**/*.java" />
+			<formatter type="${reports-checkstyle.format}" toFile="${reports-checkstyle.dir}/${reports-checkstyle.filename}" />
+		</checkstyle>
+	</target>
+
+	<!--
+       findbugs:
+       Performs byte code analysis using FindBugs
+     -->
+	<target name="findbugs" depends="compile" description="Performs byte code analysis using FindBugs, if enabled">
+		<!-- Create the FindBugs reports directory -->
+		<mkdir dir="${reports-findbugs.dir}" />
+		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="test.path" />
+		<findbugs classpathref="test.path" output="${reports-findbugs.format}" outputFile="${reports-findbugs.dir}/${reports-findbugs.filename}">
+			<sourcePath path="${java.dir}" />
+			<class location="${classes.dir}" />
+		</findbugs>
+	</target>
+
+</project>

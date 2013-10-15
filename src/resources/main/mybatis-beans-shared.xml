@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+  <!-- 
+      *** mybatis configuration ***
+      Assumes the existence of a dataSource bean  in the application context
+      as well as mybatis-config.xml on the classpath
+   -->
+  <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+    <constructor-arg index="0" ref="sqlSessionFactory" />
+    <constructor-arg index="1" value="BATCH" />
+  </bean>
+ <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="dataSource" />
+    <property name="configLocation" value="classpath:mybatis-config-shared.xml" />
+    <property name="configurationProperties" ref="sqlProps" />
+  </bean>
+  <!-- scans base package for mappers (must be interfaces)  -->
+  <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="basePackage" value="gov.noaa.ncdc.crn.persistence" />
+  </bean>
+</beans>

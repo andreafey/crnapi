@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+  <settings>
+    <setting name="mapUnderscoreToCamelCase" value="true" />
+    <setting name="defaultStatementTimeout" value="120" />
+    <setting name="defaultExecutorType" value="BATCH" />
+  </settings>
+  <typeAliases>
+    <package name="gov.noaa.ncdc.crn.domain" />
+    <package name="gov.noaa.ncdc.crn.dao.mybatis.typehandler" />
+  </typeAliases>
+<!--   Only put typeHandlers you want to be automapped here; don't use package b/c -->
+<!--   string-string mappings randomly pick a typehandler -->
+<!--   <typeHandlers> -->
+<!--     <package name="gov.noaa.ncdc.crn.dao.mybatis.typehandler"/> -->
+<!--   </typeHandlers> -->
+</configuration>

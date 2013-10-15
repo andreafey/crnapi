@@ -1,0 +1,51 @@
+<ivy-module version="2.0" xmlns:e="http://ant.apache.org/ivy/extra">
+	<info organisation="gov.noaa.ncdc.crn" module="crnshared" revision="${app.version}"/>
+	<configurations>
+		<conf name="compile" description="Libraries needed only for compilation" />
+        <conf name="runtime" description="Libraries only needed at runtime" extends="compile" />
+        <conf name="test" description="Libraries only needed for testing" extends="runtime" />
+    </configurations>
+	<publications>
+	    <artifact name="crnshared" type="jar" ext="jar"/>
+	    <artifact name="crnshared" e:classifier="javadoc" type="jar" ext="jar"/>
+	    <artifact name="crnshared" e:classifier="sources" type="jar" ext="jar"/>
+	</publications>
+	<dependencies>
+		<dependency org="com.google.guava"       name="guava"               rev="14.0.1"          conf="compile->default"/>
+		<dependency org="commons-dbcp"           name="commons-dbcp"        rev="1.4"             conf="compile->default"/>
+		<dependency org="javax.mail"             name="mail"                rev="1.4"             conf="compile->default"/>
+		<dependency org="com.google.code.gson"   name="gson"                rev="2.2.4"           conf="compile->default"/>
+		<dependency org="org.mybatis"            name="mybatis"             rev="3.2.2"           conf="compile->default"/>
+		<dependency org="org.mybatis"            name="mybatis-spring"      rev="1.2.0"           conf="compile->default"/>
+		<dependency org="org.springframework"    name="spring-aop"          rev="3.2.3.RELEASE"   conf="compile->default"/>
+		<dependency org="org.springframework"    name="spring-aspects"      rev="3.2.3.RELEASE"   conf="compile->default"/>
+		<dependency org="org.springframework"    name="spring-beans"        rev="3.2.3.RELEASE"   conf="compile->default"/>
+		<dependency org="org.springframework"    name="spring-context"      rev="3.2.3.RELEASE"   conf="compile->default"/>
+		<dependency org="org.springframework"    name="spring-core"         rev="3.2.3.RELEASE"   conf="compile->default"/>
+		<dependency org="org.springframework"    name="spring-expression"   rev="3.2.3.RELEASE"   conf="compile->default"/>
+		<dependency org="org.springframework"    name="spring-jdbc"         rev="3.2.3.RELEASE"   conf="compile->default"/>
+		<dependency org="org.springframework"    name="spring-orm"          rev="3.2.3.RELEASE"   conf="compile->default"/>
+		<dependency org="org.springframework"    name="spring-tx"           rev="3.2.3.RELEASE"   conf="compile->default"/>
+		
+		<dependency org="com.oracle"             name="ojdbc"               rev="6"               conf="runtime->default"/>
+		<dependency org="log4j"                  name="log4j"               rev="1.2.17"          conf="runtime->default"/>
+		
+		<dependency org="org.springframework"    name="spring-test"         rev="3.2.3.RELEASE"   conf="test->default"/>
+		<dependency org="org.mockito"            name="mockito-all"         rev="1.9.5"           conf="test->default"/>
+		<dependency org="org.mockftpserver"      name="MockFtpServer"       rev="2.4"             conf="test->default"/>
+		<dependency org="junit"                  name="junit"               rev="4.11"            conf="test->default"/>
+		<dependency org="pmd"                    name="pmd"                 rev="4.2.4"           conf="test->default"/>
+		<dependency org="com.google.code.findbugs"  name="findbugs-ant"     rev="2.0.1"           conf="test->default"/>
+		<dependency org="org.jacoco"             name="org.jacoco.ant"      rev="0.5.10.201208310627" conf="test->default"/>
+		<dependency org="org.jacoco"             name="org.jacoco.report"   rev="0.5.10.201208310627" conf="test->default"/>
+		<dependency org="org.jacoco"             name="org.jacoco.core"     rev="0.5.10.201208310627" conf="test->default"/>
+		<dependency org="org.jacoco"             name="org.jacoco.agent"    rev="0.5.10.201208310627" conf="test->default"/>
+		<dependency org="com.puppycrawl.tools"   name="checkstyle"          rev="5.6"             conf="test->default"/>
+
+		<exclude module="xalan" /> <!-- Contains org.apache.bcel.generic.ObjectType which conflicts with bcel module -->
+		<exclude module="ant" /> <!-- Required by pmd and izpack, but already provided when building. -->
+		<exclude module="google-collections" /><!-- puppycrawl uses this, but it conflicts with guava -->
+
+		<override org="asm" rev="3.3"/> <!-- Conflicting versions between pmd, findbugs, and jacoco -->
+	</dependencies>
+</ivy-module>

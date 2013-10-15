@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivysettings>
+  <settings defaultResolver="releases"/>
+  <credentials host="crntools.cms-b.ncdc.noaa.gov" realm="Artifactory Realm" username="${repo.username}" passwd="${repo.password}" />
+  <resolvers>
+    <!-- Artifacts provided by remote repositories -->
+    <ibiblio name="remote" m2compatible="true" root="http://crntools.cms-b.ncdc.noaa.gov/artifactory/remote-repos" />
+
+    <!-- Artifacts which are not available from public repositories due to licensing -->
+    <ibiblio name="third-party" m2compatible="true" root="http://crntools.cms-b.ncdc.noaa.gov/artifactory/libs-release" />
+    <chain name="releases">
+      <resolver ref="remote"/>
+      <resolver ref="third-party"/>
+      <!-- Artifacts that are built and used exclusively for CRN -->
+      <url name="crn-releases">
+	    <ivy pattern="http://crntools.cms-b.ncdc.noaa.gov/artifactory/crn-release-local/[organisation]/[module]/[revision]/[type]s/ivy-[revision].xml" />
+        <artifact pattern="http://crntools.cms-b.ncdc.noaa.gov/artifactory/crn-release-local/[organisation]/[module]/[revision]/[type]s/[artifact](-[classifier])-[revision].[ext]" />
+      </url>
+    </chain>
+    <chain name="snapshots">
+      <resolver ref="remote"/>
+      <resolver ref="third-party"/>
+      <!-- Artifacts that are built and used exclusively for CRN -->
+      <url name="crn-snapshots">
+	    <ivy pattern="http://crntools.cms-b.ncdc.noaa.gov/artifactory/crn-snapshot-local/[organisation]/[module]/[revision]/[type]s/ivy-[revision].xml" />
+        <artifact pattern="http://crntools.cms-b.ncdc.noaa.gov/artifactory/crn-snapshot-local/[organisation]/[module]/[revision]/[type]s/[artifact](-[classifier])-[revision].[ext]" />
+      </url>
+    </chain>
+  </resolvers>
+</ivysettings>

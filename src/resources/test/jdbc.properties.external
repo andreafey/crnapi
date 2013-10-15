@@ -1,0 +1,51 @@
+# This property file contains values inserted by the ant build from values
+# passed in at the command line, e.g. ant -Djdbc.driverClassName=org.example.MyDriver
+
+# primary jdbc settings
+jdbc.driverClassName=%%jdbc.driverClassName%%
+jdbc.validationQuery=%%jdbc.validationQuery%%
+
+# unit test jdbc settings
+unit.jdbc.url=%%dev.jdbc.url%%
+unit.jdbc.username=%%unit.jdbc.username%%
+unit.jdbc.password=%%unit.jdbc.password%%
+
+# CRN read-only database on cdodb
+prod-ro.jdbc.url=%%prod.jdbc.url%%
+prod-ro.jdbc.username=%%prod-ro.jdbc.username%%
+prod-ro.jdbc.password=%%prod-ro.jdbc.password%%
+
+# CRN read-write database on cdodb
+prod.jdbc.url=%%prod.jdbc.url%%
+prod.jdbc.username=%%prod.jdbc.username%%
+prod.jdbc.password=%%prod.jdbc.password%%
+
+# CRN read-only database on cdodb-t
+test-ro.jdbc.url=%%test.jdbc.url%%
+test-ro.jdbc.username=%%test-ro.jdbc.username%%
+test-ro.jdbc.password=%%test-ro.jdbc.password%%
+
+# CRN read-write database on cdodb-t
+test-rw.jdbc.url=%%test.jdbc.url%%
+test-rw.jdbc.username=%%test-rw.jdbc.username%%
+test-rw.jdbc.password=%%test-rw.jdbc.password%%
+
+# CRN read-only database on cdodb-d
+dev-ro.jdbc.url=%%dev.jdbc.url%%
+dev-ro.jdbc.username=%%dev-ro.jdbc.username%%
+dev-ro.jdbc.password=%%dev-ro.jdbc.password%%
+
+# CRN read-write database on cdodb-d
+dev-rw.jdbc.url=%%dev.jdbc.url%%
+dev-rw.jdbc.username=%%dev-rw.jdbc.username%%
+dev-rw.jdbc.password=%%dev-rw.jdbc.password%%
+
+# custom jdbc settings
+custom.jdbc.driverClassName=%%custom.jdbc.driverClassName%%
+custom.jdbc.url=%%custom.jdbc.url%%
+custom.jdbc.username=%%custom.jdbc.username%%
+custom.jdbc.password=%%custom.jdbc.password%%
+custom.jdbc.validationQuery=%%custom.jdbc.validationQuery%%
+
+# required; must be standard or memcache; refers to profiles-config.xml sqlMapProps bean choice
+cache.strategy=%%cache.strategy%%
